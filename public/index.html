@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🇰🇪 AI Scam & Fraud Detector</title>
+    <style>
+        :root { --primary: #2563eb; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --border: #e2e8f0; --danger: #dc2626; --success: #16a34a; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 2rem; display: flex; justify-content: center; min-height: 100vh; }
+        .container { max-width: 650px; width: 100%; background: var(--card); padding: 2rem; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: var(--primary); margin: 0 0 0.5rem; }
+        p.subtitle { text-align: center; color: #64748b; margin-top: 0; margin-bottom: 1.5rem; font-size: 0.95rem; }
+        textarea { width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 10px; font-size: 1rem; resize: vertical; min-height: 130px; box-sizing: border-box; transition: border 0.2s; }
+        textarea:focus { outline: none; border-color: var(--primary); }
+        button { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 12px; transition: all 0.2s; }
+        button:hover { background: #1d4ed8; transform: translateY(-1px); }
+        button:disabled { background: #94a3b8; cursor: not-allowed; transform: none; }
+        .result { margin-top: 20px; padding: 18px; background: #f1f5f9; border-radius: 10px; border-left: 5px solid var(--primary); white-space: pre-wrap; display: none; line-height: 1.5; }
+        .result.scam { border-left-color: var(--danger); background: #fef2f2; color: #7f1d1d; }
+        .result.legit { border-left-color: var(--success); background: #f0fdf4; color: #14532d; }
+        .loading { display: none; text-align: center; margin-top: 15px; color: #64748b; font-weight: 500; }
+        .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #94a3b8; border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-right: 8px; vertical-align: middle; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🇰🇪 AI Scam Detector</h1>
+        <p class="subtitle">Paste a suspicious link, job offer, or message below. Our AI will instantly analyze it for fraud.</p>
+        
+        <textarea id="inputContent" placeholder="Paste URL or text here... (e.g., https://fake-iebc.site or 'IEBC 2026 RECRUITMENT...')"></textarea>
+        <button id="analyzeBtn" onclick="analyzeContent()">🔍 Analyze Now</button>
+        
+        <div class="loading" id="loading"><span class="spinner"></span> Analyzing... Please wait while AI scans the content.</div>
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        async function analyzeContent() {
+            const input = document.getElementById('inputContent').value.trim();
+            if (!input) return alert("Please paste some text or a URL first.");
+
+            const btn = document.getElementById('analyzeBtn');
+            const loading = document.getElementById('loading');
+            const resultDiv = document.getElementById('result');
+
+            btn.disabled = true;
+            loading.style.display = 'block';
+            resultDiv.style.display = 'none';
+
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: input })
+                });
+                const data = await response.json();
+                
+                resultDiv.textContent = data.result || data.error;
+                resultDiv.style.display = 'block';
+                
+                // Visual cue based on AI verdict
+                if (data.result.toLowerCase().includes('scam') || data.result.toLowerCase().includes('fraud')) {
+                    resultDiv.className = 'result scam';
+                } else {
+                    resultDiv.className = 'result legit';
+                }
+            } catch (err) {
+                resultDiv.textContent = "❌ Failed to connect to the analysis server.";
+                resultDiv.className = 'result scam';
+                resultDiv.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                loading.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
